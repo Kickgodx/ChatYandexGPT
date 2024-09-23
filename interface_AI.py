@@ -61,6 +61,9 @@ def stop_recording(audio, stream):
     wf.setframerate(RATE)
     wf.writeframes(b''.join(frames))
     wf.close()
+    
+    # Освобождение памяти
+    frames = []
 
     # Нормализация уровня звука
     normalize_audio(WAVE_OUTPUT_FILENAME)
@@ -69,14 +72,17 @@ def stop_recording(audio, stream):
     transcribed_text = transcribe_audio(WAVE_OUTPUT_FILENAME)
     print(f"Transcribed text: {transcribed_text}")
     
-    # Получение ответа от GigaChat
+    # Очистка текстового поля и вставка текста пользователя
+    clear_and_insert_user_text(transcribed_text)
+    
+    # Получение ответа от AI
     response = bot.get_response(transcribed_text)
     print(f"AI response: {response}")
 
     # Запись ответа в файл
     with open(RESPONSE_OUTPUT_FILENAME, 'a', encoding='utf-8') as f:
         f.write(f"User: {transcribed_text}\n")
-        f.write(f"GigaChat: {response}\n\n")
+        f.write(f"AI: {response}\n\n")
 
     # Обновление текстового поля в интерфейсе
     update_text_widget(transcribed_text, response)
@@ -186,9 +192,14 @@ def transcribe_audio(file_path):
     result_text = result_dict.get('text', '')
     return result_text
 
+def clear_and_insert_user_text(transcribed_text):
+    text_widget.config(state=tk.NORMAL)
+    text_widget.delete(1.0, tk.END)
+    text_widget.insert(tk.END, f"User: {transcribed_text}\n")
+    text_widget.config(state=tk.DISABLED)
+
 def update_text_widget(transcribed_text, response):
     text_widget.config(state=tk.NORMAL)
-    text_widget.insert(tk.END, f"User: {transcribed_text}\n")
     text_widget.insert(tk.END, f"AI: {response}\n\n")
     text_widget.config(state=tk.DISABLED)
 
