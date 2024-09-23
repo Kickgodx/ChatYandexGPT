@@ -23,7 +23,7 @@
 
 2) Получить свои credentials для YandexChatGPT:
 * Зарегистрироваться на [Yandex Cloud](https://yandex.cloud/)
-* Получить iam_token и iam_token и заменить их значения в файле yandex_creds.py
+* Получить iam_token и folder_id и заменить их значения в файле yandex_creds.py
 
 3) Cоздать виртуальное окружение python -m venv venv
 ```bash
