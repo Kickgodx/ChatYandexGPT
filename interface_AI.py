@@ -8,10 +8,11 @@ import tkinter as tk
 from tkinter import scrolledtext
 from vosk import Model, KaldiRecognizer
 from yandexchat_bot import ChatYandexGPTBot
-from yandex_creds import iam_token, folder_id, path_to_vosk_model
+from yandex_creds import iam_token, folder_id, path_to_vosk_model, api_key
 
 # Создание экземпляра ChatYandexGPTBot
-bot = ChatYandexGPTBot(iam_token, folder_id)
+# bot = ChatYandexGPTBot(iam_token, folder_id)
+bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
 
 # Конфигурация записи аудио
 FORMAT = pyaudio.paInt16
