@@ -4,6 +4,9 @@ from langchain_community.chat_models.yandex import ChatYandexGPT
 
 prompt = "Я бот-программист, который помогает пользователю решить его задачи, а так же хорошо разбирается во всех аспектах программирования и тестирования. Так же я могу помочь с любыми теоретическими вопросами. "
 
+model_name="yandexgpt"
+model_name_lite="yandexgpt_lite" # По умолчанию используется модель yandexgpt_lite, передается как model_name в ChatYandexGPT
+
 class ChatYandexGPTBot:
     def __init__(self, folder_id, iam_token=None, api_key=None):
         # Авторизация в сервисе ChatYandexGPTBot
