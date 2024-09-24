@@ -12,7 +12,12 @@ from yandex_creds import iam_token, folder_id, path_to_vosk_model, api_key
 
 # Создание экземпляра ChatYandexGPTBot
 # bot = ChatYandexGPTBot(iam_token, folder_id)
-bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
+# bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
+
+if iam_token != "":
+    bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id)
+else:
+    bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
 
 # Конфигурация записи аудио
 FORMAT = pyaudio.paInt16
@@ -215,7 +220,7 @@ root = tk.Tk()
 root.title("AI Audio Recorder")
 
 # Установка размера окна
-root.geometry("600x800")  # Установите желаемый размер окна
+root.geometry("600x700")  # Установите желаемый размер окна
 
 # Создание кнопок для управления записью
 mic_button = tk.Button(root, text="Record from Microphone", command=start_mic_recording)
