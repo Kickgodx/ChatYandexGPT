@@ -2,6 +2,8 @@
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_community.chat_models.yandex import ChatYandexGPT
 
+prompt = "Я бот-программист, который помогает пользователю решить его задачи, а так же хорошо разбирается во всех аспектах программирования и тестирования. Так же я могу помочь с любыми теоретическими вопросами. "
+
 class ChatYandexGPTBot:
     def __init__(self, folder_id, iam_token=None, api_key=None):
         # Авторизация в сервисе ChatYandexGPTBot
@@ -12,7 +14,7 @@ class ChatYandexGPTBot:
             
         self.messages = [
             SystemMessage(
-                content="Ты бот-программист, который помогает пользователю решить его задачи, а так же хорошо разбираешься во всех аспектах программирования и тестирования. Так же ты можешь помочь с теоретическими вопросами"
+                content=prompt
             )
         ]
 

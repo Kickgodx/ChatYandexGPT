@@ -11,9 +11,6 @@ from yandexchat_bot import ChatYandexGPTBot
 from yandex_creds import iam_token, folder_id, path_to_vosk_model, api_key
 
 # Создание экземпляра ChatYandexGPTBot
-# bot = ChatYandexGPTBot(iam_token, folder_id)
-# bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
-
 if iam_token != "":
     bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id)
 else:
