@@ -208,8 +208,8 @@ def start_computer_recording():
     threading.Thread(target=record_audio_from_computer).start()
 
 def send_text_to_ai():
-    user_text = text_entry.get()
-    if user_text.strip():
+    user_text = text_entry.get("1.0", tk.END).strip()
+    if user_text:
         logging.info(f"User input text: {user_text}")
         response = bot.get_response(user_text)
         logging.info(f"AI response: {response}")
@@ -219,8 +219,15 @@ def send_text_to_ai():
             f.write(f"User: {user_text}\n")
             f.write(f"AI: {response}\n\n")
 
+        # Очистка полей ввода и вывода
+        text_widget.config(state=tk.NORMAL)
+        text_entry.delete(1.0, tk.END)
+        text_widget.delete(1.0, tk.END)
+
         # Обновление текстового поля в интерфейсе
-        update_text_widget(user_text, response)
+        text_widget.insert(tk.END, f"User: {user_text}\n")
+        text_widget.insert(tk.END, f"AI: {response}\n\n")
+        text_widget.config(state=tk.DISABLED)
 
 # Создание основного окна приложения
 root = tk.Tk()
@@ -241,7 +248,7 @@ text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED, w
 text_widget.pack(pady=10)
 
 # Создание текстового поля для ввода текста
-text_entry = tk.Entry(root, width=70)
+text_entry = tk.Text(root, width=70, height=5)
 text_entry.pack(pady=10)
 
 # Создание кнопки для отправки текста
