@@ -9,14 +9,12 @@ from tkinter import scrolledtext
 from vosk import Model, KaldiRecognizer
 from yandexchat_bot import ChatYandexGPTBot
 from yandex_creds import iam_token, folder_id, path_to_vosk_model, api_key
+import logging
 
-# Создание экземпляра ChatYandexGPTBot
-if iam_token != "":
-    bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id)
-else:
-    bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
 
-# Конфигурация записи аудио
+# Константы
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 16000
@@ -24,13 +22,17 @@ CHUNK = 1024
 WAVE_OUTPUT_FILENAME = "./outputs/question.wav"
 RESPONSE_OUTPUT_FILENAME = "./outputs/responses.txt"
 
-start_time = time.time()
+# Создание экземпляра ChatYandexGPTBot
+if iam_token != "":
+    bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id)
+else:
+    bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
 
 # Загрузка модели Vosk
-model = Model(path_to_vosk_model)  # Укажите путь к распакованной модели Vosk
-
-print("Model loaded in {:.2f} seconds.".format(time.time() - start_time))
-print("Ready to start recording...")
+start_time = time.time()
+model = Model(path_to_vosk_model)
+logging.info("Model loaded in {:.2f} seconds.".format(time.time() - start_time))
+logging.info("Ready to start recording...")
 
 # Блокировка для предотвращения одновременной записи
 recording_lock = threading.Lock()
@@ -48,22 +50,21 @@ def start_recording(audio, stream):
     global frames
     frames = []
     stream.start_stream()
-    print("Recording started...")
+    logging.info("Recording started...")
 
 def stop_recording(audio, stream):
     global frames
     stream.stop_stream()
     stream.close()
     audio.terminate()
-    print("Recording stopped.")
+    logging.info("Recording stopped.")
 
     # Сохранение записанного аудио в файл
-    wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(audio.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
-    wf.writeframes(b''.join(frames))
-    wf.close()
+    with wave.open(WAVE_OUTPUT_FILENAME, 'wb') as wf:
+        wf.setnchannels(CHANNELS)
+        wf.setsampwidth(audio.get_sample_size(FORMAT))
+        wf.setframerate(RATE)
+        wf.writeframes(b''.join(frames))
     
     # Освобождение памяти
     frames = []
@@ -73,14 +74,14 @@ def stop_recording(audio, stream):
 
     # Транскрипция аудио и вывод текста
     transcribed_text = transcribe_audio(WAVE_OUTPUT_FILENAME)
-    print(f"Transcribed text: {transcribed_text}")
+    logging.info(f"Transcribed text: {transcribed_text}")
     
     # Очистка текстового поля и вставка текста пользователя
     clear_and_insert_user_text(transcribed_text)
     
     # Получение ответа от AI
     response = bot.get_response(transcribed_text)
-    print(f"AI response: {response}")
+    logging.info(f"AI response: {response}")
 
     # Запись ответа в файл
     with open(RESPONSE_OUTPUT_FILENAME, 'a', encoding='utf-8') as f:
@@ -91,16 +92,12 @@ def stop_recording(audio, stream):
     update_text_widget(transcribed_text, response)
 
 def normalize_audio(file_path):
-    # Открытие аудиофайла
-    wf = wave.open(file_path, 'rb')
-    n_channels = wf.getnchannels()
-    sampwidth = wf.getsampwidth()
-    framerate = wf.getframerate()
-    n_frames = wf.getnframes()
-
-    # Чтение аудиоданных
-    audio_data = wf.readframes(n_frames)
-    wf.close()
+    with wave.open(file_path, 'rb') as wf:
+        n_channels = wf.getnchannels()
+        sampwidth = wf.getsampwidth()
+        framerate = wf.getframerate()
+        n_frames = wf.getnframes()
+        audio_data = wf.readframes(n_frames)
 
     # Преобразование аудиоданных в массив numpy
     audio_array = np.frombuffer(audio_data, dtype=np.int16)
@@ -113,13 +110,11 @@ def normalize_audio(file_path):
     # Преобразование массива numpy обратно в байты
     normalized_audio_data = audio_array.astype(np.int16).tobytes()
 
-    # Сохранение нормализованных аудиоданных в файл
-    wf = wave.open(file_path, 'wb')
-    wf.setnchannels(n_channels)
-    wf.setsampwidth(sampwidth)
-    wf.setframerate(framerate)
-    wf.writeframes(normalized_audio_data)
-    wf.close()
+    with wave.open(file_path, 'wb') as wf:
+        wf.setnchannels(n_channels)
+        wf.setsampwidth(sampwidth)
+        wf.setframerate(framerate)
+        wf.writeframes(normalized_audio_data)
 
 def record_audio_from_mic():
     global is_recording_mic, mic_stream, frames
@@ -156,7 +151,7 @@ def record_audio_from_computer():
                     break
 
             if input_device_index is None:
-                print("Stereo Mix device not found.")
+                logging.error("Stereo Mix device not found.")
                 return
 
             # Настройка потока записи
@@ -177,22 +172,22 @@ def callback(in_data, frame_count, time_info, status):
     return (in_data, pyaudio.paContinue)
 
 def transcribe_audio(file_path):
-    wf = wave.open(file_path, "rb")
-    rec = KaldiRecognizer(model, wf.getframerate())
-    rec.SetWords(True)
+    with wave.open(file_path, "rb") as wf:
+        rec = KaldiRecognizer(model, wf.getframerate())
+        rec.SetWords(True)
 
-    print("Starting transcription...")
-    result_text = ""
+        logging.info("Starting transcription...")
+        result_text = ""
 
-    while True:
-        data = wf.readframes(CHUNK)
-        if len(data) == 0:
-            break
-        rec.AcceptWaveform(data)
+        while True:
+            data = wf.readframes(CHUNK)
+            if len(data) == 0:
+                break
+            rec.AcceptWaveform(data)
 
-    result = rec.FinalResult()
-    result_dict = json.loads(result)
-    result_text = result_dict.get('text', '')
+        result = rec.FinalResult()
+        result_dict = json.loads(result)
+        result_text = result_dict.get('text', '')
     return result_text
 
 def clear_and_insert_user_text(transcribed_text):
@@ -217,7 +212,7 @@ root = tk.Tk()
 root.title("AI Audio Recorder")
 
 # Установка размера окна
-root.geometry("600x700")  # Установите желаемый размер окна
+root.geometry("600x700")
 
 # Создание кнопок для управления записью
 mic_button = tk.Button(root, text="Record from Microphone", command=start_mic_recording)
