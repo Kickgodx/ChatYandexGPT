@@ -207,6 +207,21 @@ def start_mic_recording():
 def start_computer_recording():
     threading.Thread(target=record_audio_from_computer).start()
 
+def send_text_to_ai():
+    user_text = text_entry.get()
+    if user_text.strip():
+        logging.info(f"User input text: {user_text}")
+        response = bot.get_response(user_text)
+        logging.info(f"AI response: {response}")
+
+        # Запись ответа в файл
+        with open(RESPONSE_OUTPUT_FILENAME, 'a', encoding='utf-8') as f:
+            f.write(f"User: {user_text}\n")
+            f.write(f"AI: {response}\n\n")
+
+        # Обновление текстового поля в интерфейсе
+        update_text_widget(user_text, response)
+
 # Создание основного окна приложения
 root = tk.Tk()
 root.title("AI Audio Recorder")
@@ -222,8 +237,16 @@ computer_button = tk.Button(root, text="Record from Computer", command=start_com
 computer_button.pack(pady=10)
 
 # Создание текстового поля для отображения транскрибированного текста и ответа
-text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED, width=70, height=35)
+text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED, width=70, height=25)
 text_widget.pack(pady=10)
+
+# Создание текстового поля для ввода текста
+text_entry = tk.Entry(root, width=70)
+text_entry.pack(pady=10)
+
+# Создание кнопки для отправки текста
+send_button = tk.Button(root, text="Send Text to AI", command=send_text_to_ai)
+send_button.pack(pady=10)
 
 # Запуск основного цикла приложения
 root.mainloop()
