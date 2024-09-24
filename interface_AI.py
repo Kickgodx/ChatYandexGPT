@@ -76,20 +76,8 @@ def stop_recording(audio, stream):
     transcribed_text = transcribe_audio(WAVE_OUTPUT_FILENAME)
     logging.info(f"Transcribed text: {transcribed_text}")
     
-    # Очистка текстового поля и вставка текста пользователя
-    clear_and_insert_user_text(transcribed_text)
-    
-    # Получение ответа от AI
-    response = bot.get_response(transcribed_text)
-    logging.info(f"AI response: {response}")
-
-    # Запись ответа в файл
-    with open(RESPONSE_OUTPUT_FILENAME, 'a', encoding='utf-8') as f:
-        f.write(f"User: {transcribed_text}\n")
-        f.write(f"AI: {response}\n\n")
-
-    # Обновление текстового поля в интерфейсе
-    update_text_widget(transcribed_text, response)
+    # Добавление транскрибированного текста в поле ввода
+    add_transcribed_text_to_entry(transcribed_text)
 
 def normalize_audio(file_path):
     with wave.open(file_path, 'rb') as wf:
@@ -190,14 +178,16 @@ def transcribe_audio(file_path):
         result_text = result_dict.get('text', '')
     return result_text
 
-def clear_and_insert_user_text(transcribed_text):
-    text_widget.config(state=tk.NORMAL)
-    text_widget.delete(1.0, tk.END)
-    text_widget.insert(tk.END, f"User: {transcribed_text}\n")
-    text_widget.config(state=tk.DISABLED)
+def add_transcribed_text_to_entry(transcribed_text):
+    text_entry.config(state=tk.NORMAL)
+    text_entry.delete("1.0", tk.END)
+    text_entry.insert(tk.END, transcribed_text)
+    text_entry.config(state=tk.NORMAL)
 
-def update_text_widget(transcribed_text, response):
+def update_text_widget(user_text, response):
     text_widget.config(state=tk.NORMAL)
+    text_widget.delete("1.0", tk.END)
+    text_widget.insert(tk.END, f"User: {user_text}\n")
     text_widget.insert(tk.END, f"AI: {response}\n\n")
     text_widget.config(state=tk.DISABLED)
 
@@ -219,15 +209,11 @@ def send_text_to_ai():
             f.write(f"User: {user_text}\n")
             f.write(f"AI: {response}\n\n")
 
-        # Очистка полей ввода и вывода
-        text_widget.config(state=tk.NORMAL)
-        text_entry.delete(1.0, tk.END)
-        text_widget.delete(1.0, tk.END)
+        # Очистка поля ввода
+        text_entry.delete("1.0", tk.END)
 
         # Обновление текстового поля в интерфейсе
-        text_widget.insert(tk.END, f"User: {user_text}\n")
-        text_widget.insert(tk.END, f"AI: {response}\n\n")
-        text_widget.config(state=tk.DISABLED)
+        update_text_widget(user_text, response)
 
 # Создание основного окна приложения
 root = tk.Tk()
