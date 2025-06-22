@@ -20,7 +20,7 @@ class Settings:
     def get_default_settings():
         """Получение настроек по умолчанию"""
         return {
-            "audio_quality_threshold": 100,
+            "audio_quality_threshold": 15,
             "max_conversation_history": 50,
             "auto_save_interval": 10,
             "hotkeys_enabled": True

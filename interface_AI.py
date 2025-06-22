@@ -30,9 +30,9 @@ class AIAudioRecorderApp:
 
         # Инициализация бота с промптом по умолчанию
         if iam_token != "":
-            self.bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id)
+            self.bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id, model_name="yandexgpt-lite")
         else:
-            self.bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
+            self.bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id, model_name="yandexgpt-lite")
 
         self.conversation_manager = ConversationManager(self.config, self.bot)
 
@@ -52,7 +52,7 @@ class AIAudioRecorderApp:
         if not self.audio_recorder.is_recording:
             try:
                 self.audio_recorder.start_recording('mic')
-                self.gui.update_recording_status(True)
+                self.gui.update_recording_status(True, 'mic')
             except Exception as e:
                 self.gui.show_error("Ошибка", f"Не удалось начать запись: {str(e)}")
                 logging.error(f"Error starting mic recording: {e}")
@@ -64,7 +64,7 @@ class AIAudioRecorderApp:
         if not self.audio_recorder.is_recording:
             try:
                 self.audio_recorder.start_recording('computer')
-                self.gui.update_recording_status(True)
+                self.gui.update_recording_status(True, 'computer')
             except Exception as e:
                 self.gui.show_error("Ошибка", f"Не удалось начать запись: {str(e)}")
                 logging.error(f"Error starting computer recording: {e}")
@@ -100,6 +100,8 @@ class AIAudioRecorderApp:
                 # Проверка качества аудио
                 audio_data = b''.join(frames)
                 quality_ok, quality_msg = self.audio_recorder.check_audio_quality(audio_data)
+                
+                # Показываем предупреждение только если качество действительно плохое
                 if not quality_ok:
                     self.gui.show_warning("Предупреждение", quality_msg)
 

@@ -1,0 +1,6 @@
+{
+    "audio_quality_threshold": 15,
+    "max_conversation_history": 50,
+    "auto_save_interval": 10,
+    "hotkeys_enabled": true
+} 

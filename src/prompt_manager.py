@@ -10,6 +10,26 @@ class PromptManager:
         self.prompt_window = None
         self.prompt_var = None
         self.prompt_combobox = None
+        self.model_var = None
+        self.model_combobox = None
+        
+        # Цветовая схема в серых тонах (такая же как в GUI)
+        self.colors = {
+            'bg_primary': '#2C2C2C',      # Темно-серый фон
+            'bg_secondary': '#3C3C3C',    # Средне-серый для элементов
+            'bg_tertiary': '#4C4C4C',     # Светло-серый для кнопок
+            'text_primary': '#E0E0E0',    # Светло-серый текст
+            'text_secondary': '#B0B0B0',  # Серый текст
+            'accent': '#6C6C6C',          # Акцентный серый
+            'success': '#4A7C59',         # Темно-зеленый для успеха
+            'warning': '#8B7355',         # Темно-оранжевый для предупреждений
+            'error': '#8B5A5A',           # Темно-красный для ошибок
+            'code_bg': '#1E1E1E',         # Темный фон для кода
+            'code_text': '#D4D4D4',       # Светлый текст для кода
+            'code_keyword': '#569CD6',    # Синий для ключевых слов
+            'code_string': '#CE9178',     # Оранжевый для строк
+            'code_comment': '#6A9955',    # Зеленый для комментариев
+        }
 
     def show_prompt_selector(self):
         """Показать окно выбора промпта"""
@@ -21,6 +41,7 @@ class PromptManager:
         self.prompt_window.geometry("700x600")
         self.prompt_window.transient(self.app.gui.root)
         self.prompt_window.grab_set()
+        self.prompt_window.configure(bg=self.colors['bg_primary'])
 
         # Центрирование окна
         self.prompt_window.update_idletasks()
@@ -33,16 +54,47 @@ class PromptManager:
     def _create_prompt_selector_ui(self):
         """Создание интерфейса выбора промпта"""
         # Заголовок
-        title_label = tk.Label(self.prompt_window, text="Выберите тип Промпта",
-                               font=("Arial", 16, "bold"))
+        title_label = tk.Label(self.prompt_window, text="Выберите тип помощника",
+                               font=("Arial", 16, "bold"),
+                               bg=self.colors['bg_primary'], fg=self.colors['text_primary'])
         title_label.pack(pady=20)
 
-        # Фрейм для выбора
-        selection_frame = tk.Frame(self.prompt_window)
+        # Фрейм для выбора модели
+        model_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
+        model_frame.pack(pady=10, padx=20, fill=tk.X)
+
+        # Комбобокс для выбора модели
+        tk.Label(model_frame, text="Модель YandexGPT:", 
+                font=("Arial", 12), 
+                bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
+
+        self.model_var = tk.StringVar()
+        self.model_combobox = ttk.Combobox(model_frame, textvariable=self.model_var,
+                                           state="readonly", font=("Arial", 11))
+        self.model_combobox.pack(fill=tk.X, pady=5)
+
+        # Заполнение комбобокса моделей
+        available_models = self.app.bot.get_available_models()
+        model_options = []
+        for key, value in available_models.items():
+            model_options.append(f"{value['name']} - {value['description']}")
+
+        self.model_combobox['values'] = model_options
+
+        # Установка текущего значения модели
+        current_model = self.app.bot.get_current_model_info()
+        current_model_option = f"{current_model['name']} - {current_model['description']}"
+        if current_model_option in model_options:
+            self.model_combobox.set(current_model_option)
+
+        # Фрейм для выбора промпта
+        selection_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
         selection_frame.pack(pady=20, padx=20, fill=tk.X)
 
         # Комбобокс для выбора промпта
-        tk.Label(selection_frame, text="Тип помощника:", font=("Arial", 12)).pack(anchor=tk.W)
+        tk.Label(selection_frame, text="Тип помощника:", 
+                font=("Arial", 12), 
+                bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
 
         self.prompt_var = tk.StringVar()
         self.prompt_combobox = ttk.Combobox(selection_frame, textvariable=self.prompt_var,
@@ -67,43 +119,59 @@ class PromptManager:
         self.prompt_combobox.bind('<<ComboboxSelected>>', self._on_prompt_selected)
 
         # Фрейм для описания
-        description_frame = tk.Frame(self.prompt_window)
+        description_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
         description_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
-        tk.Label(description_frame, text="Описание выбранного промпта:",
-                 font=("Arial", 12, "bold")).pack(anchor=tk.W)
+        tk.Label(description_frame, text="Описание выбранного помощника:",
+                 font=("Arial", 12, "bold"),
+                 bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
 
         # Текстовое поле для описания
         self.description_text = tk.Text(description_frame, wrap=tk.WORD, height=15,
-                                        state=tk.DISABLED, font=("Arial", 10))
+                                        state=tk.DISABLED, font=("Consolas", 10),
+                                        bg=self.colors['bg_secondary'], fg=self.colors['text_primary'],
+                                        insertbackground=self.colors['text_primary'],
+                                        selectbackground=self.colors['accent'],
+                                        selectforeground=self.colors['text_primary'],
+                                        relief=tk.FLAT)
         self.description_text.pack(fill=tk.BOTH, expand=True, pady=5)
 
         # Скроллбар для текста
         scrollbar = tk.Scrollbar(description_frame, orient=tk.VERTICAL,
-                                 command=self.description_text.yview)
+                                 command=self.description_text.yview,
+                                 bg=self.colors['bg_secondary'])
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.description_text.config(yscrollcommand=scrollbar.set)
 
         # Кнопки
-        button_frame = tk.Frame(self.prompt_window)
+        button_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
         button_frame.pack(pady=20, padx=20, fill=tk.X)
 
         # Кнопка применения (зеленая, самая заметная)
         apply_button = tk.Button(button_frame, text="✅ Применить",
-                                 command=self._apply_prompt, bg="#4CAF50", fg="white",
-                                 font=("Arial", 12, "bold"), height=2, width=15)
+                                 command=self._apply_prompt, 
+                                 bg=self.colors['success'], fg=self.colors['text_primary'],
+                                 font=("Arial", 12, "bold"), height=2, width=15,
+                                 relief=tk.FLAT, activebackground=self.colors['accent'],
+                                 activeforeground=self.colors['text_primary'])
         apply_button.pack(side=tk.LEFT, padx=10)
 
         # Кнопка сброса диалога
         reset_button = tk.Button(button_frame, text="🔄 Сбросить диалог",
-                                 command=self._reset_conversation, bg="#FF9800", fg="white",
-                                 font=("Arial", 11), height=2, width=15)
+                                 command=self._reset_conversation, 
+                                 bg=self.colors['warning'], fg=self.colors['text_primary'],
+                                 font=("Arial", 11), height=2, width=15,
+                                 relief=tk.FLAT, activebackground=self.colors['accent'],
+                                 activeforeground=self.colors['text_primary'])
         reset_button.pack(side=tk.LEFT, padx=10)
 
         # Кнопка отмены
         cancel_button = tk.Button(button_frame, text="❌ Отмена",
-                                  command=self._cancel, bg="#f44336", fg="white",
-                                  font=("Arial", 11), height=2, width=15)
+                                  command=self._cancel, 
+                                  bg=self.colors['error'], fg=self.colors['text_primary'],
+                                  font=("Arial", 11), height=2, width=15,
+                                  relief=tk.FLAT, activebackground=self.colors['accent'],
+                                  activeforeground=self.colors['text_primary'])
         cancel_button.pack(side=tk.RIGHT, padx=10)
 
         # Показать описание текущего промпта
@@ -145,27 +213,45 @@ class PromptManager:
         self.description_text.config(state=tk.DISABLED)
 
     def _apply_prompt(self):
-        """Применить выбранный промпт"""
-        selected = self.prompt_var.get()
-        if not selected:
+        """Применить выбранный промпт и модель"""
+        selected_prompt = self.prompt_var.get()
+        selected_model = self.model_var.get()
+        
+        if not selected_prompt:
             messagebox.showwarning("Предупреждение", "Выберите тип промпта")
             return
 
-        # Найти ключ промпта
+        if not selected_model:
+            messagebox.showwarning("Предупреждение", "Выберите модель")
+            return
+
+        # Применяем модель
+        available_models = self.app.bot.get_available_models()
+        for key, value in available_models.items():
+            if f"{value['name']} - {value['description']}" == selected_model:
+                try:
+                    self.app.bot.set_model(key)
+                    model_name = value['name']
+                    break
+                except Exception as e:
+                    messagebox.showerror("Ошибка", f"Не удалось применить модель: {str(e)}")
+                    return
+
+        # Применяем промпт
         available_prompts = self.app.bot.get_available_prompts()
         for key, value in available_prompts.items():
-            if f"{value['name']} - {value['description']}" == selected:
+            if f"{value['name']} - {value['description']}" == selected_prompt:
                 # Применить промпт
                 self.app.bot.set_prompt(key)
 
                 # Обновить статус в главном окне
-                self._update_main_window_status(key, value['name'])
+                self._update_main_window_status(key, value['name'], model_name)
 
-                messagebox.showinfo("Успех", f"Промпт изменен на: {value['name']}")
+                messagebox.showinfo("Успех", f"Настройки изменены:\nМодель: {model_name}\nПомощник: {value['name']}")
                 self.prompt_window.destroy()
                 return
 
-        messagebox.showerror("Ошибка", "Не удалось применить выбранный промпт")
+        messagebox.showerror("Ошибка", "Не удалось применить выбранные настройки")
 
     def _reset_conversation(self):
         """Сбросить диалог"""
@@ -179,28 +265,44 @@ class PromptManager:
         """Отмена выбора"""
         self.prompt_window.destroy()
 
-    def _update_main_window_status(self, prompt_key, prompt_name):
+    def _update_main_window_status(self, prompt_key, prompt_name, model_name):
         """Обновить статус в главном окне"""
         # Обновляем заголовок окна
-        self.app.gui.root.title(f"AI Audio Recorder - {prompt_name}")
+        self.app.gui.root.title(f"AI Audio Recorder - {prompt_name} ({model_name})")
 
         # Обновляем индикатор текущего промпта в интерфейсе
         if hasattr(self.app.gui, 'prompt_status_label'):
-            self.app.gui.prompt_status_label.config(text=f"Текущий помощник: {prompt_name}")
+            self.app.gui.prompt_status_label.config(text=f"Помощник: {prompt_name}")
+        
+        # Обновляем индикатор текущей модели в интерфейсе
+        if hasattr(self.app.gui, 'model_status_label'):
+            self.app.gui.model_status_label.config(text=f"Модель: {model_name}")
 
     def add_prompt_status_to_gui(self):
         """Добавить индикатор текущего промпта в главное окно"""
         if not hasattr(self.app.gui, 'prompt_status_label'):
             # Создаем фрейм для статуса промпта
-            status_frame = tk.Frame(self.app.gui.root)
+            status_frame = tk.Frame(self.app.gui.root, bg=self.colors['bg_primary'])
             status_frame.pack(pady=5, padx=10, fill=tk.X)
 
-            # Метка статуса
+            # Метка статуса промпта
             current_prompt = self.app.bot.get_current_prompt_info()
             self.app.gui.prompt_status_label = tk.Label(
                 status_frame,
-                text=f"Текущий промпт: {current_prompt['name']}",
+                text=f"Помощник: {current_prompt['name']}",
                 font=("Arial", 10, "italic"),
-                fg="#666666"
+                fg=self.colors['text_secondary'],
+                bg=self.colors['bg_primary']
             )
             self.app.gui.prompt_status_label.pack(side=tk.LEFT)
+
+            # Метка статуса модели
+            current_model = self.app.bot.get_current_model_info()
+            self.app.gui.model_status_label = tk.Label(
+                status_frame,
+                text=f"Модель: {current_model['name']}",
+                font=("Arial", 10, "italic"),
+                fg=self.colors['text_secondary'],
+                bg=self.colors['bg_primary']
+            )
+            self.app.gui.model_status_label.pack(side=tk.LEFT, padx=(20, 0))
