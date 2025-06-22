@@ -1,259 +1,192 @@
-import pyaudio
-import wave
-import json
-import threading
-import time
-import numpy as np
-import tkinter as tk
-from tkinter import scrolledtext
-from vosk import Model, KaldiRecognizer
-from yandexchat_bot import ChatYandexGPTBot
-from yandex_creds import iam_token, folder_id, path_to_vosk_model, api_key
 import logging
+import threading
 
-# Настройка логирования
-logging.basicConfig(level=logging.INFO)
+from yandex_creds import iam_token, folder_id, path_to_vosk_model, api_key
+from yandexchat_bot import ChatYandexGPTBot
 
-# Константы
-FORMAT = pyaudio.paInt16
-CHANNELS = 1
-RATE = 16000
-CHUNK = 1024
-WAVE_OUTPUT_FILENAME = "./outputs/question.wav"
-RESPONSE_OUTPUT_FILENAME = "./outputs/responses.txt"
+from src.utils import setup_logging, ensure_output_directory
+from src.config import Config
+from src.settings import Settings
+from src.audio_recorder import AudioRecorder
+from src.audio_processor import AudioProcessor
+from src.speech_recognizer import SpeechRecognizer
+from src.conversation_manager import ConversationManager
+from src.gui import GUI
+from src.prompt_manager import PromptManager
 
-# Создание экземпляра ChatYandexGPTBot
-if iam_token != "":
-    bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id)
-else:
-    bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
 
-# Загрузка модели Vosk
-start_time = time.time()
-model = Model(path_to_vosk_model)
-logging.info("Model loaded in {:.2f} seconds.".format(time.time() - start_time))
-logging.info("Ready to start recording...")
-
-# Блокировка для предотвращения одновременной записи
-recording_lock = threading.Lock()
-
-# Флаги для отслеживания состояния записи
-is_recording_mic = False
-is_recording_computer = False
-
-# Переменные для хранения потоков записи
-mic_stream = None
-computer_stream = None
-frames = []
-
-def start_recording(audio, stream):
-    global frames
-    frames = []
-    stream.start_stream()
-    logging.info("Recording started...")
-
-def stop_recording(audio, stream):
-    global frames
-    stream.stop_stream()
-    stream.close()
-    audio.terminate()
-    logging.info("Recording stopped.")
-
-    # Сохранение записанного аудио в файл
-    with wave.open(WAVE_OUTPUT_FILENAME, 'wb') as wf:
-        wf.setnchannels(CHANNELS)
-        wf.setsampwidth(audio.get_sample_size(FORMAT))
-        wf.setframerate(RATE)
-        wf.writeframes(b''.join(frames))
+class AIAudioRecorderApp:
+    """Основной класс приложения AI Audio Recorder"""
     
-    # Освобождение памяти
-    frames = []
+    def __init__(self):
+        setup_logging()
 
-    # Нормализация уровня звука
-    normalize_audio(WAVE_OUTPUT_FILENAME)
+        # Инициализация компонентов
+        self.config = Config()
+        self.settings = Settings()
+        self.audio_recorder = AudioRecorder(self.config, self.settings)
+        self.audio_processor = AudioProcessor(self.config)
+        self.speech_recognizer = SpeechRecognizer(path_to_vosk_model)
 
-    # Транскрипция аудио и вывод текста
-    transcribed_text = transcribe_audio(WAVE_OUTPUT_FILENAME)
-    logging.info(f"Transcribed text: {transcribed_text}")
-    
-    # Очистка текстового поля и вставка текста пользователя
-    clear_and_insert_user_text(transcribed_text)
-    
-    # Получение ответа от AI
-    response = bot.get_response(transcribed_text)
-    logging.info(f"AI response: {response}")
-
-    # Запись ответа в файл
-    with open(RESPONSE_OUTPUT_FILENAME, 'a', encoding='utf-8') as f:
-        f.write(f"User: {transcribed_text}\n")
-        f.write(f"AI: {response}\n\n")
-
-    # Обновление текстового поля в интерфейсе
-    update_text_widget(transcribed_text, response)
-
-def normalize_audio(file_path):
-    with wave.open(file_path, 'rb') as wf:
-        n_channels = wf.getnchannels()
-        sampwidth = wf.getsampwidth()
-        framerate = wf.getframerate()
-        n_frames = wf.getnframes()
-        audio_data = wf.readframes(n_frames)
-
-    # Преобразование аудиоданных в массив numpy
-    audio_array = np.frombuffer(audio_data, dtype=np.int16)
-
-    # Нормализация аудиоданных
-    max_val = np.max(np.abs(audio_array))
-    if max_val > 0:
-        audio_array = audio_array * (32767 / max_val)
-
-    # Преобразование массива numpy обратно в байты
-    normalized_audio_data = audio_array.astype(np.int16).tobytes()
-
-    with wave.open(file_path, 'wb') as wf:
-        wf.setnchannels(n_channels)
-        wf.setsampwidth(sampwidth)
-        wf.setframerate(framerate)
-        wf.writeframes(normalized_audio_data)
-
-def record_audio_from_mic():
-    global is_recording_mic, mic_stream, frames
-    with recording_lock:
-        audio = pyaudio.PyAudio()
-        if not is_recording_mic:
-            # Настройка потока записи
-            mic_stream = audio.open(format=FORMAT, channels=CHANNELS,
-                                    rate=RATE, input=True,
-                                    frames_per_buffer=CHUNK,
-                                    stream_callback=callback)
-            start_recording(audio, mic_stream)
-            is_recording_mic = True
+        # Инициализация бота с промптом по умолчанию
+        if iam_token != "":
+            self.bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id)
         else:
-            stop_recording(audio, mic_stream)
-            is_recording_mic = False
+            self.bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id)
 
-def record_audio_from_computer():
-    global is_recording_computer, computer_stream, frames
-    with recording_lock:
-        audio = pyaudio.PyAudio()
-        if not is_recording_computer:
-            # Получение списка устройств ввода
-            input_device_index = None
-            for i in range(audio.get_device_count()):
-                dev = audio.get_device_info_by_index(i)
-                # Преобразование имени устройства из windows-1251 в utf-8
+        self.conversation_manager = ConversationManager(self.config, self.bot)
+
+        # Создание GUI
+        self.gui = GUI(self)
+        self.gui.create_gui()
+        self.gui.setup_hotkeys()
+        
+        # Инициализация менеджера промптов
+        self.prompt_manager = PromptManager(self)
+        self.prompt_manager.add_prompt_status_to_gui()
+
+        logging.info("Application initialized successfully")
+
+    def start_mic_recording(self):
+        """Начало записи с микрофона"""
+        if not self.audio_recorder.is_recording:
+            try:
+                self.audio_recorder.start_recording('mic')
+                self.gui.update_recording_status(True)
+            except Exception as e:
+                self.gui.show_error("Ошибка", f"Не удалось начать запись: {str(e)}")
+                logging.error(f"Error starting mic recording: {e}")
+        else:
+            self.stop_recording()
+
+    def start_computer_recording(self):
+        """Начало записи с компьютера"""
+        if not self.audio_recorder.is_recording:
+            try:
+                self.audio_recorder.start_recording('computer')
+                self.gui.update_recording_status(True)
+            except Exception as e:
+                self.gui.show_error("Ошибка", f"Не удалось начать запись: {str(e)}")
+                logging.error(f"Error starting computer recording: {e}")
+        else:
+            self.stop_recording()
+
+    def stop_recording(self):
+        """Остановка записи"""
+        if self.audio_recorder.is_recording:
+            frames = self.audio_recorder.stop_recording()
+            self.gui.update_recording_status(False)
+
+            if frames:
+                self.process_audio(frames)
+
+    def cancel_recording(self):
+        """Отмена записи"""
+        if self.audio_recorder.is_recording:
+            self.audio_recorder.stop_recording()
+            self.gui.update_recording_status(False)
+            self.gui.show_info("Информация", "Запись отменена")
+
+    def process_audio(self, frames):
+        """Обработка записанного аудио"""
+        def process():
+            try:
+                self.gui.show_progress("Сохранение аудио...")
+                self.audio_processor.save_audio(frames, self.config.WAVE_OUTPUT_FILENAME)
+
+                self.gui.update_progress_message("Нормализация аудио...")
+                self.audio_processor.normalize_audio(self.config.WAVE_OUTPUT_FILENAME)
+
+                # Проверка качества аудио
+                audio_data = b''.join(frames)
+                quality_ok, quality_msg = self.audio_recorder.check_audio_quality(audio_data)
+                if not quality_ok:
+                    self.gui.show_warning("Предупреждение", quality_msg)
+
+                self.gui.update_progress_message("Распознавание речи...")
+                transcribed_text = self.speech_recognizer.transcribe_audio(self.config.WAVE_OUTPUT_FILENAME)
+
+                if not transcribed_text.strip():
+                    self.gui.show_warning("Предупреждение", "Речь не распознана. Попробуйте говорить четче.")
+                    self.gui.hide_progress()
+                    return
+
+                self.gui.update_progress_message("Получение ответа от AI...")
+                response = self.bot.get_response(transcribed_text)
+
+                # Добавление в историю
+                self.conversation_manager.add_message(transcribed_text, response)
+                self.conversation_manager.save_conversation()
+
+                # Обновление интерфейса
+                self.gui.root.after(0, lambda: self.gui.update_text_widget(transcribed_text, response))
+
+                self.gui.hide_progress()
+                logging.info(f"Processed audio: '{transcribed_text}' -> '{response[:50]}...'")
+
+            except Exception as e:
+                self.gui.hide_progress()
+                self.gui.show_error("Ошибка", f"Ошибка обработки аудио: {str(e)}")
+                logging.error(f"Error processing audio: {e}")
+
+        threading.Thread(target=process, daemon=True).start()
+
+    def send_text_to_ai(self):
+        """Отправка текста в AI"""
+        user_text = self.gui.text_entry.get("1.0", "end-1c").strip()
+        if user_text:
+            def send():
                 try:
-                    dev_name = dev['name'].encode('windows-1251').decode('utf-8')
-                except UnicodeDecodeError:
-                    dev_name = dev['name']
-                if dev_name.lower().startswith("стерео") or dev_name.startswith("Стерео"):
-                    input_device_index = i
-                    break
+                    self.gui.show_progress("Получение ответа от AI...")
+                    response = self.bot.get_response(user_text)
 
-            if input_device_index is None:
-                logging.error("Stereo Mix device not found.")
-                return
+                    # Добавление в историю
+                    self.conversation_manager.add_message(user_text, response)
+                    self.conversation_manager.save_conversation()
 
-            # Настройка потока записи
-            computer_stream = audio.open(format=FORMAT, channels=CHANNELS,
-                                         rate=RATE, input=True,
-                                         input_device_index=input_device_index,
-                                         frames_per_buffer=CHUNK,
-                                         stream_callback=callback)
-            start_recording(audio, computer_stream)
-            is_recording_computer = True
-        else:
-            stop_recording(audio, computer_stream)
-            is_recording_computer = False
+                    # Обновление интерфейса
+                    self.gui.root.after(0, lambda: self.gui.update_text_widget(user_text, response))
+                    self.gui.root.after(0, lambda: self.gui.clear_text_entry())
 
-def callback(in_data, frame_count, time_info, status):
-    global frames
-    frames.append(in_data)
-    return (in_data, pyaudio.paContinue)
+                    self.gui.hide_progress()
+                    logging.info(f"Text sent: '{user_text}' -> '{response[:50]}...'")
 
-def transcribe_audio(file_path):
-    with wave.open(file_path, "rb") as wf:
-        rec = KaldiRecognizer(model, wf.getframerate())
-        rec.SetWords(True)
+                except Exception as e:
+                    self.gui.hide_progress()
+                    self.gui.show_error("Ошибка", f"Ошибка получения ответа: {str(e)}")
+                    logging.error(f"Error sending text: {e}")
 
-        logging.info("Starting transcription...")
-        result_text = ""
+            threading.Thread(target=send, daemon=True).start()
 
-        while True:
-            data = wf.readframes(CHUNK)
-            if len(data) == 0:
-                break
-            rec.AcceptWaveform(data)
+    def export_conversation(self):
+        """Экспорт диалога"""
+        try:
+            filename = self.conversation_manager.export_conversation('txt')
+            self.gui.show_info("Экспорт", f"Диалог экспортирован в файл: {filename}")
+        except Exception as e:
+            self.gui.show_error("Ошибка", f"Ошибка экспорта: {str(e)}")
 
-        result = rec.FinalResult()
-        result_dict = json.loads(result)
-        result_text = result_dict.get('text', '')
-    return result_text
+    def clear_conversation(self):
+        """Очистка истории диалога"""
+        if self.gui.ask_yes_no("Подтверждение", "Очистить историю диалога?"):
+            self.gui.clear_text_widget()
+            self.conversation_manager.conversation_history.clear()
 
-def clear_and_insert_user_text(transcribed_text):
-    text_widget.config(state=tk.NORMAL)
-    text_widget.delete(1.0, tk.END)
-    text_widget.insert(tk.END, f"User: {transcribed_text}\n")
-    text_widget.config(state=tk.DISABLED)
+    def show_prompt_selector(self):
+        """Показать окно выбора промпта"""
+        self.prompt_manager.show_prompt_selector()
 
-def update_text_widget(transcribed_text, response):
-    text_widget.config(state=tk.NORMAL)
-    text_widget.insert(tk.END, f"AI: {response}\n\n")
-    text_widget.config(state=tk.DISABLED)
+    def get_conversation_summary(self):
+        """Получить краткое резюме диалога"""
+        return self.bot.get_conversation_summary()
 
-def start_mic_recording():
-    threading.Thread(target=record_audio_from_mic).start()
+    def run(self):
+        """Запуск приложения"""
+        ensure_output_directory()
+        logging.info("Starting AI Audio Recorder application")
+        self.gui.root.mainloop()
 
-def start_computer_recording():
-    threading.Thread(target=record_audio_from_computer).start()
 
-def send_text_to_ai():
-    user_text = text_entry.get("1.0", tk.END).strip()
-    if user_text:
-        logging.info(f"User input text: {user_text}")
-        response = bot.get_response(user_text)
-        logging.info(f"AI response: {response}")
-
-        # Запись ответа в файл
-        with open(RESPONSE_OUTPUT_FILENAME, 'a', encoding='utf-8') as f:
-            f.write(f"User: {user_text}\n")
-            f.write(f"AI: {response}\n\n")
-
-        # Очистка полей ввода и вывода
-        text_widget.config(state=tk.NORMAL)
-        text_entry.delete(1.0, tk.END)
-        text_widget.delete(1.0, tk.END)
-
-        # Обновление текстового поля в интерфейсе
-        text_widget.insert(tk.END, f"User: {user_text}\n")
-        text_widget.insert(tk.END, f"AI: {response}\n\n")
-        text_widget.config(state=tk.DISABLED)
-
-# Создание основного окна приложения
-root = tk.Tk()
-root.title("AI Audio Recorder")
-
-# Установка размера окна
-root.geometry("600x700")
-
-# Создание кнопок для управления записью
-mic_button = tk.Button(root, text="Record from Microphone", command=start_mic_recording)
-mic_button.pack(pady=10)
-
-computer_button = tk.Button(root, text="Record from Computer", command=start_computer_recording)
-computer_button.pack(pady=10)
-
-# Создание текстового поля для отображения транскрибированного текста и ответа
-text_widget = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED, width=70, height=25)
-text_widget.pack(pady=10)
-
-# Создание текстового поля для ввода текста
-text_entry = tk.Text(root, width=70, height=5)
-text_entry.pack(pady=10)
-
-# Создание кнопки для отправки текста
-send_button = tk.Button(root, text="Send Text to AI", command=send_text_to_ai)
-send_button.pack(pady=10)
-
-# Запуск основного цикла приложения
-root.mainloop()
+if __name__ == "__main__":
+    app = AIAudioRecorderApp()
+    app.run()
