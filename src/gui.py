@@ -151,7 +151,7 @@ class GUI:
         if is_recording:
             self.recording_label.config(text="🔴 ЗАПИСЬ...", fg=self.colors['error'])
             self.cancel_button.config(state=tk.NORMAL)
-            
+
             # Делаем активной только ту кнопку, которая была нажата
             if device_type == 'mic':
                 self.mic_button.config(
@@ -184,7 +184,7 @@ class GUI:
         else:
             self.recording_label.config(text="", fg=self.colors['text_primary'])
             self.cancel_button.config(state=tk.DISABLED)
-            
+
             # Возвращаем обе кнопки в исходное состояние
             self.mic_button.config(
                 text="🎤 Запись с микрофона",

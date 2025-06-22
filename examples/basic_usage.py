@@ -68,13 +68,13 @@ def main():
         for i, question in enumerate(questions, 1):
             print(f"❓ Вопрос {i}: {question}")
             print("🤖 Ответ:")
-            
+
             try:
                 response = bot.get_response(question)
                 print(response)
             except Exception as e:
                 print(f"❌ Ошибка: {e}")
-            
+
             print("-" * 50)
 
         # Получение резюме диалога
@@ -84,11 +84,11 @@ def main():
         # Демонстрация смены промпта
         print("\n🔄 Смена промпта на 'teacher'...")
         bot.set_prompt("teacher")
-        
+
         teacher_question = "Объясни, что такое фотосинтез простыми словами"
         print(f"❓ Вопрос: {teacher_question}")
         print("🤖 Ответ:")
-        
+
         try:
             response = bot.get_response(teacher_question)
             print(response)
@@ -102,4 +102,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

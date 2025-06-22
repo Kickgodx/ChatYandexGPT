@@ -13,7 +13,7 @@ messages = [
     )
 ]
 
-while(True):
+while (True):
     # Ввод пользователя
     user_input = input("User: ")
     messages.append(HumanMessage(content=user_input))

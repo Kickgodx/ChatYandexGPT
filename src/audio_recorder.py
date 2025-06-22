@@ -87,13 +87,13 @@ class AudioRecorder:
         """Проверка качества аудио"""
         audio_array = np.frombuffer(audio_data, dtype=np.int16)
         rms = np.sqrt(np.mean(audio_array ** 2))
-        
+
         # Порог для определения слишком тихого аудио
         threshold = self.settings.settings.get("audio_quality_threshold", 15)
-        
+
         # Возвращаем предупреждение только если аудио действительно слишком тихое
         if rms < threshold:
             return False, f"Аудио слишком тихое (RMS: {rms:.2f}, порог: {threshold})"
-        
+
         # Если аудио нормальное, не показываем никаких сообщений
         return True, ""

@@ -19,6 +19,7 @@ python package_builder.py
 ```
 
 Этот скрипт:
+
 1. Очистит предыдущие сборки (папки `dist` и `yandexgptbot_lib.egg-info`)
 2. Соберет пакет (source distribution и wheel)
 3. Установит пакет в режиме разработки

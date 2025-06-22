@@ -44,7 +44,7 @@ def main():
         # 1. Демонстрация доступных промптов
         print("1️⃣ Доступные промпты:")
         available_prompts = PromptCollection.get_available_prompts()
-        
+
         for key, prompt_info in available_prompts.items():
             print(f"   {key}: {prompt_info['name']}")
             print(f"      {prompt_info['description']}")
@@ -63,11 +63,11 @@ def main():
         # 3. Демонстрация работы с ботом (если доступен)
         if bot:
             print("3️⃣ Демонстрация работы с ботом:")
-            
+
             # Показываем текущие настройки
             current_prompt = bot.get_current_prompt_info()
             current_model = bot.get_current_model_info()
-            
+
             print(f"   Текущий помощник: {current_prompt['name']}")
             print(f"   Текущая модель: {current_model['name']}")
             print()
@@ -85,34 +85,34 @@ def main():
             for prompt_type, question in test_prompts:
                 print(f"   🔄 Смена на промпт: {prompt_type}")
                 bot.set_prompt(prompt_type)
-                
+
                 current_prompt = bot.get_current_prompt_info()
                 print(f"   🤖 Помощник: {current_prompt['name']}")
                 print(f"   ❓ Вопрос: {question}")
-                
+
                 try:
                     response = bot.get_response(question)
                     print(f"   💬 Ответ: {response[:200]}...")
                 except Exception as e:
                     print(f"   ❌ Ошибка: {e}")
-                
+
                 print("-" * 50)
 
             # 4. Демонстрация управления диалогом
             print("\n4️⃣ Управление диалогом:")
-            
+
             # Добавление контекста
             bot.add_context("Пользователь работает над проектом на Python")
             print("   📝 Контекст добавлен")
-            
+
             # Получение резюме
             summary = bot.get_conversation_summary()
             print(f"   📊 Резюме: {summary}")
-            
+
             # Сброс диалога
             bot.reset_conversation()
             print("   🔄 Диалог сброшен")
-            
+
             summary_after_reset = bot.get_conversation_summary()
             print(f"   📊 Резюме после сброса: {summary_after_reset}")
 
@@ -138,4 +138,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

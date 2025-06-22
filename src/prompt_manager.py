@@ -12,23 +12,23 @@ class PromptManager:
         self.prompt_combobox = None
         self.model_var = None
         self.model_combobox = None
-        
+
         # Цветовая схема в серых тонах (такая же как в GUI)
         self.colors = {
-            'bg_primary': '#2C2C2C',      # Темно-серый фон
-            'bg_secondary': '#3C3C3C',    # Средне-серый для элементов
-            'bg_tertiary': '#4C4C4C',     # Светло-серый для кнопок
-            'text_primary': '#E0E0E0',    # Светло-серый текст
+            'bg_primary': '#2C2C2C',  # Темно-серый фон
+            'bg_secondary': '#3C3C3C',  # Средне-серый для элементов
+            'bg_tertiary': '#4C4C4C',  # Светло-серый для кнопок
+            'text_primary': '#E0E0E0',  # Светло-серый текст
             'text_secondary': '#B0B0B0',  # Серый текст
-            'accent': '#6C6C6C',          # Акцентный серый
-            'success': '#4A7C59',         # Темно-зеленый для успеха
-            'warning': '#8B7355',         # Темно-оранжевый для предупреждений
-            'error': '#8B5A5A',           # Темно-красный для ошибок
-            'code_bg': '#1E1E1E',         # Темный фон для кода
-            'code_text': '#D4D4D4',       # Светлый текст для кода
-            'code_keyword': '#569CD6',    # Синий для ключевых слов
-            'code_string': '#CE9178',     # Оранжевый для строк
-            'code_comment': '#6A9955',    # Зеленый для комментариев
+            'accent': '#6C6C6C',  # Акцентный серый
+            'success': '#4A7C59',  # Темно-зеленый для успеха
+            'warning': '#8B7355',  # Темно-оранжевый для предупреждений
+            'error': '#8B5A5A',  # Темно-красный для ошибок
+            'code_bg': '#1E1E1E',  # Темный фон для кода
+            'code_text': '#D4D4D4',  # Светлый текст для кода
+            'code_keyword': '#569CD6',  # Синий для ключевых слов
+            'code_string': '#CE9178',  # Оранжевый для строк
+            'code_comment': '#6A9955',  # Зеленый для комментариев
         }
 
     def show_prompt_selector(self):
@@ -64,9 +64,9 @@ class PromptManager:
         model_frame.pack(pady=10, padx=20, fill=tk.X)
 
         # Комбобокс для выбора модели
-        tk.Label(model_frame, text="Модель YandexGPT:", 
-                font=("Arial", 12), 
-                bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
+        tk.Label(model_frame, text="Модель YandexGPT:",
+                 font=("Arial", 12),
+                 bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
 
         self.model_var = tk.StringVar()
         self.model_combobox = ttk.Combobox(model_frame, textvariable=self.model_var,
@@ -92,9 +92,9 @@ class PromptManager:
         selection_frame.pack(pady=20, padx=20, fill=tk.X)
 
         # Комбобокс для выбора промпта
-        tk.Label(selection_frame, text="Тип помощника:", 
-                font=("Arial", 12), 
-                bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
+        tk.Label(selection_frame, text="Тип помощника:",
+                 font=("Arial", 12),
+                 bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
 
         self.prompt_var = tk.StringVar()
         self.prompt_combobox = ttk.Combobox(selection_frame, textvariable=self.prompt_var,
@@ -149,7 +149,7 @@ class PromptManager:
 
         # Кнопка применения (зеленая, самая заметная)
         apply_button = tk.Button(button_frame, text="✅ Применить",
-                                 command=self._apply_prompt, 
+                                 command=self._apply_prompt,
                                  bg=self.colors['success'], fg=self.colors['text_primary'],
                                  font=("Arial", 12, "bold"), height=2, width=15,
                                  relief=tk.FLAT, activebackground=self.colors['accent'],
@@ -158,7 +158,7 @@ class PromptManager:
 
         # Кнопка сброса диалога
         reset_button = tk.Button(button_frame, text="🔄 Сбросить диалог",
-                                 command=self._reset_conversation, 
+                                 command=self._reset_conversation,
                                  bg=self.colors['warning'], fg=self.colors['text_primary'],
                                  font=("Arial", 11), height=2, width=15,
                                  relief=tk.FLAT, activebackground=self.colors['accent'],
@@ -167,7 +167,7 @@ class PromptManager:
 
         # Кнопка отмены
         cancel_button = tk.Button(button_frame, text="❌ Отмена",
-                                  command=self._cancel, 
+                                  command=self._cancel,
                                   bg=self.colors['error'], fg=self.colors['text_primary'],
                                   font=("Arial", 11), height=2, width=15,
                                   relief=tk.FLAT, activebackground=self.colors['accent'],
@@ -216,7 +216,7 @@ class PromptManager:
         """Применить выбранный промпт и модель"""
         selected_prompt = self.prompt_var.get()
         selected_model = self.model_var.get()
-        
+
         if not selected_prompt:
             messagebox.showwarning("Предупреждение", "Выберите тип промпта")
             return
@@ -273,7 +273,7 @@ class PromptManager:
         # Обновляем индикатор текущего промпта в интерфейсе
         if hasattr(self.app.gui, 'prompt_status_label'):
             self.app.gui.prompt_status_label.config(text=f"Помощник: {prompt_name}")
-        
+
         # Обновляем индикатор текущей модели в интерфейсе
         if hasattr(self.app.gui, 'model_status_label'):
             self.app.gui.model_status_label.config(text=f"Модель: {model_name}")

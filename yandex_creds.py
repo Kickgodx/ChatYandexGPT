@@ -1,5 +1,0 @@
-iam_token = ""
-folder_id = ""
-path_to_vosk_model = "./vosk-model-ru-0.42"
-api_key_id = ""
-api_key = ""

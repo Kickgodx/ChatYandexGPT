@@ -1,0 +1,137 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python files
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# Python docstrings
+[*.py]
+block_comment_start = """
+block_comment_end = """
+
+# Python setup files
+[setup.py]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# Python requirements files
+[requirements*.txt]
+indent_style = space
+indent_size = 4
+
+# Python test files
+[test_*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# Python configuration files
+[*.cfg]
+indent_style = space
+indent_size = 4
+
+# Python ini files
+[*.ini]
+indent_style = space
+indent_size = 4
+
+# Markdown files
+[*.md]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+trim_trailing_whitespace = false
+
+# YAML files
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 4
+
+# JavaScript files
+[*.{js,jsx}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# TypeScript files
+[*.{ts,tsx}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# HTML files
+[*.{html,htm}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# CSS files
+[*.{css,scss,sass}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# Shell scripts
+[*.sh]
+indent_style = space
+indent_size = 4
+
+# Batch files
+[*.{bat,cmd}]
+indent_style = space
+indent_size = 4
+
+# PowerShell files
+[*.ps1]
+indent_style = space
+indent_size = 4
+
+# Makefiles
+[Makefile]
+indent_style = tab
+
+# Docker files
+[Dockerfile]
+indent_style = space
+indent_size = 4
+
+# Git ignore files
+[*.gitignore]
+indent_style = space
+indent_size = 4
+
+# EditorConfig files
+[.editorconfig]
+indent_style = space
+indent_size = 4
+
+# License files
+[LICENSE*]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = false
+
+# Readme files
+[README*]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+trim_trailing_whitespace = false 

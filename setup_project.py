@@ -23,11 +23,11 @@ def create_env_file():
     if os.path.exists(".env"):
         print("✅ Файл .env уже существует")
         return True
-    
+
     if not os.path.exists("env.example"):
         print("❌ Файл env.example не найден")
         return False
-    
+
     try:
         shutil.copy("env.example", ".env")
         print("✅ Файл .env создан из env.example")
@@ -52,7 +52,7 @@ def create_outputs_directory():
 def check_vosk_model():
     """Проверка наличия модели Vosk"""
     vosk_path = os.getenv("VOSK_MODEL_PATH", "./vosk-model-ru-0.42")
-    
+
     if os.path.exists(vosk_path):
         print(f"✅ Модель Vosk найдена: {vosk_path}")
         return True
@@ -75,9 +75,9 @@ def check_requirements():
 
 def show_next_steps():
     """Показать следующие шаги"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🎉 Инициализация проекта завершена!")
-    print("="*60)
+    print("=" * 60)
     print("\n📋 Следующие шаги:")
     print("1. Активируйте виртуальное окружение:")
     print("   python -m venv venv")
@@ -107,25 +107,25 @@ def show_next_steps():
 def main():
     """Основная функция"""
     print("🚀 Инициализация проекта ChatYandexGPT")
-    print("="*60)
-    
+    print("=" * 60)
+
     success = True
-    
+
     # Проверки
     if not check_python_version():
         success = False
-    
+
     if not check_requirements():
         success = False
-    
+
     if not create_env_file():
         success = False
-    
+
     if not create_outputs_directory():
         success = False
-    
+
     check_vosk_model()  # Предупреждение, не критично
-    
+
     if success:
         show_next_steps()
     else:
@@ -133,4 +133,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

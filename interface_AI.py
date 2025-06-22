@@ -1,23 +1,22 @@
 import logging
 import threading
 
-from src.env_loader import get_env_var, get_required_env_var
-from yandexchat_bot import ChatYandexGPTBot
-
-from src.utils import setup_logging, ensure_output_directory
-from src.config import Config
-from src.settings import Settings
-from src.audio_recorder import AudioRecorder
 from src.audio_processor import AudioProcessor
-from src.speech_recognizer import SpeechRecognizer
+from src.audio_recorder import AudioRecorder
+from src.config import Config
 from src.conversation_manager import ConversationManager
+from src.env_loader import get_env_var, get_required_env_var
 from src.gui import GUI
 from src.prompt_manager import PromptManager
+from src.settings import Settings
+from src.speech_recognizer import SpeechRecognizer
+from src.utils import setup_logging, ensure_output_directory
+from yandexchat_bot import ChatYandexGPTBot
 
 
 class AIAudioRecorderApp:
     """Основной класс приложения AI Audio Recorder"""
-    
+
     def __init__(self):
         setup_logging()
 
@@ -52,7 +51,7 @@ class AIAudioRecorderApp:
         self.gui = GUI(self)
         self.gui.create_gui()
         self.gui.setup_hotkeys()
-        
+
         # Инициализация менеджера промптов
         self.prompt_manager = PromptManager(self)
         self.prompt_manager.add_prompt_status_to_gui()
@@ -101,6 +100,7 @@ class AIAudioRecorderApp:
 
     def process_audio(self, frames):
         """Обработка записанного аудио"""
+
         def process():
             try:
                 self.gui.show_progress("Сохранение аудио...")
@@ -112,7 +112,7 @@ class AIAudioRecorderApp:
                 # Проверка качества аудио
                 audio_data = b''.join(frames)
                 quality_ok, quality_msg = self.audio_recorder.check_audio_quality(audio_data)
-                
+
                 # Показываем предупреждение только если качество действительно плохое
                 if not quality_ok:
                     self.gui.show_warning("Предупреждение", quality_msg)

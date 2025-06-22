@@ -23,7 +23,7 @@ class ChatYandexGPTBot:
             "max_tokens": 8000
         },
         "yandexgpt-plus": {
-            "name": "YandexGPT Plus", 
+            "name": "YandexGPT Plus",
             "description": "Продвинутая модель с улучшенными возможностями",
             "max_tokens": 8000
         }
@@ -43,10 +43,10 @@ class ChatYandexGPTBot:
         # Проверка доступности модели
         if model_name not in self.AVAILABLE_MODELS:
             raise ValueError(f"Модель '{model_name}' не поддерживается. Доступные модели: {list(self.AVAILABLE_MODELS.keys())}")
-        
+
         self.model_name = model_name
         self.model_info = self.AVAILABLE_MODELS[model_name]
-        
+
         # Авторизация в сервисе
         if api_key:
             self.chat = ChatYandexGPT(api_key=api_key, folder_id=folder_id, model_name=model_name)
@@ -57,7 +57,7 @@ class ChatYandexGPTBot:
 
         # Инициализация истории сообщений
         self.messages = []
-        
+
         # Установка промпта
         self.prompt_type = prompt_type
         self.set_prompt(prompt_type)
@@ -68,10 +68,10 @@ class ChatYandexGPTBot:
         """Установить новую модель"""
         if model_name not in self.AVAILABLE_MODELS:
             raise ValueError(f"Модель '{model_name}' не поддерживается")
-        
+
         self.model_name = model_name
         self.model_info = self.AVAILABLE_MODELS[model_name]
-        
+
         # Пересоздаем чат с новой моделью
         if hasattr(self, 'chat'):
             # Сохраняем текущие credentials
@@ -79,7 +79,7 @@ class ChatYandexGPTBot:
                 self.chat = ChatYandexGPT(api_key=self.chat.api_key, folder_id=self.chat.folder_id, model_name=model_name)
             elif hasattr(self.chat, 'iam_token'):
                 self.chat = ChatYandexGPT(iam_token=self.chat.iam_token, folder_id=self.chat.folder_id, model_name=model_name)
-        
+
         logging.info(f"Model changed to: {model_name}")
 
     def get_current_model_info(self):
@@ -185,7 +185,7 @@ class ChatYandexGPTBot:
         """Получить полную информацию о системе"""
         current_prompt = self.get_current_prompt_info()
         current_model = self.get_current_model_info()
-        
+
         return {
             'model': current_model,
             'prompt': current_prompt,

@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
 import os
+
+from setuptools import setup, find_packages
 
 # Переходим в корневую папку проекта для чтения файлов
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

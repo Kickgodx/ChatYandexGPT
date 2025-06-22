@@ -71,13 +71,13 @@ def main():
         try:
             recorder.start_recording('mic')
             print("   🔴 Запись началась... Говорите!")
-            
+
             # Запись в течение 5 секунд
             time.sleep(5)
-            
+
             frames = recorder.stop_recording()
             print("   ⏹️ Запись остановлена")
-            
+
             if frames:
                 # Сохранение аудио
                 audio_file = "demo_mic.wav"
@@ -97,10 +97,10 @@ def main():
                 # Распознавание речи
                 print("   🎯 Распознавание речи...")
                 transcribed_text = recognizer.transcribe_audio(audio_file)
-                
+
                 if transcribed_text.strip():
                     print(f"   📝 Распознанный текст: '{transcribed_text}'")
-                    
+
                     # Отправка в AI (если бот доступен)
                     if bot:
                         print("   🤖 Отправка в AI...")
@@ -118,7 +118,7 @@ def main():
 
         # Демонстрация работы с существующим аудиофайлом
         print("2️⃣ Демонстрация работы с существующим аудиофайлом")
-        
+
         # Проверяем, есть ли уже записанный файл
         if os.path.exists("demo_mic.wav"):
             print("   📁 Используем записанный файл: demo_mic.wav")
@@ -128,23 +128,23 @@ def main():
             # Создаем простой тестовый аудиофайл
             import wave
             import numpy as np
-            
+
             # Генерируем простой синусоидальный сигнал
             sample_rate = 16000
             duration = 2  # секунды
             frequency = 440  # Hz
-            
+
             t = np.linspace(0, duration, int(sample_rate * duration), False)
             audio_data = np.sin(2 * np.pi * frequency * t) * 0.3
             audio_data = (audio_data * 32767).astype(np.int16)
-            
+
             audio_file = "test_audio.wav"
             with wave.open(audio_file, 'wb') as wf:
                 wf.setnchannels(1)
                 wf.setsampwidth(2)
                 wf.setframerate(sample_rate)
                 wf.writeframes(audio_data.tobytes())
-            
+
             print(f"   💾 Тестовый файл создан: {audio_file}")
 
         # Обработка файла
@@ -156,7 +156,7 @@ def main():
             # Распознавание
             print("   🎯 Распознавание речи...")
             transcribed_text = recognizer.transcribe_audio(audio_file)
-            
+
             if transcribed_text.strip():
                 print(f"   📝 Распознанный текст: '{transcribed_text}'")
             else:
@@ -173,4 +173,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()
