@@ -88,11 +88,6 @@ celerybeat.pid
 .env.*
 .venv
 .venv.*
-ENV/
-env/
-env.bak/
-venv/
-venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -123,3 +118,9 @@ cython_debug/
 
 vosk-model*/
 outputs/
+
+# Credentials and sensitive data
+.env
+.env.local
+.env.production
+.env.development

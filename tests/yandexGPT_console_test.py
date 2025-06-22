@@ -1,6 +1,5 @@
 """Пример работы с чатом через gigachain"""
 from langchain.schema import HumanMessage, SystemMessage
-# from langchain.chat_models.yandex import ChatYandexGPT
 from langchain_community.chat_models.yandex import ChatYandexGPT
 from yandex_creds import iam_token, folder_id
 

@@ -1,7 +1,7 @@
 import logging
 import threading
 
-from yandex_creds import iam_token, folder_id, path_to_vosk_model, api_key
+from src.env_loader import get_env_var, get_required_env_var
 from yandexchat_bot import ChatYandexGPTBot
 
 from src.utils import setup_logging, ensure_output_directory
@@ -21,15 +21,27 @@ class AIAudioRecorderApp:
     def __init__(self):
         setup_logging()
 
+        # Загрузка credentials из переменных окружения
+        try:
+            folder_id = get_required_env_var("YANDEX_FOLDER_ID")
+            iam_token = get_env_var("YANDEX_IAM_TOKEN", None)
+            api_key = get_env_var("YANDEX_API_KEY", None)
+            vosk_model_path = get_env_var("VOSK_MODEL_PATH", "./vosk-model-ru-0.42")
+        except ValueError as e:
+            logging.error(f"Ошибка загрузки credentials: {e}")
+            raise
+
         # Инициализация компонентов
         self.config = Config()
         self.settings = Settings()
         self.audio_recorder = AudioRecorder(self.config, self.settings)
         self.audio_processor = AudioProcessor(self.config)
-        self.speech_recognizer = SpeechRecognizer(path_to_vosk_model)
+        self.speech_recognizer = SpeechRecognizer(vosk_model_path)
 
         # Инициализация бота с промптом по умолчанию
-        if iam_token != "":
+        print(iam_token)
+        print(api_key)
+        if iam_token is not None and iam_token != "":
             self.bot = ChatYandexGPTBot(iam_token=iam_token, folder_id=folder_id, model_name="yandexgpt-lite")
         else:
             self.bot = ChatYandexGPTBot(api_key=api_key, folder_id=folder_id, model_name="yandexgpt-lite")
