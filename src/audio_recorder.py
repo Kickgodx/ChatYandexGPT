@@ -24,6 +24,7 @@ class AudioRecorder:
             if not self.is_recording:
                 self.device_type = device_type
                 self.audio = pyaudio.PyAudio()
+                logging.info(f"Starting recording from {device_type}")
 
                 if device_type == 'mic':
                     self.stream = self.audio.open(
@@ -52,23 +53,36 @@ class AudioRecorder:
                 self.frames = []
                 self.stream.start_stream()
                 self.is_recording = True
-                logging.info(f"Recording started from {device_type}")
+                logging.info(f"Recording started from {device_type}, stream active: {self.stream.is_active()}")
+            else:
+                logging.warning(f"Recording already in progress from {self.device_type}")
 
     def stop_recording(self):
         """Остановка записи аудио"""
+        frames = None
         with self.lock:
             if self.is_recording:
                 self.stream.stop_stream()
                 self.stream.close()
                 self.audio.terminate()
                 self.is_recording = False
+                frames = self.frames.copy()  # Копируем кадры перед очисткой
+                self.frames = []
                 logging.info("Recording stopped")
-                return self.frames
-        return None
+            else:
+                # Если запись уже остановлена, но кадры есть, возвращаем их
+                if self.frames:
+                    frames = self.frames.copy()
+                    self.frames = []
+                    logging.info("Returning existing frames")
+        
+        return frames
 
     def callback(self, in_data, frame_count, time_info, status):
         """Callback для записи аудио"""
         self.frames.append(in_data)
+        if len(self.frames) % 10 == 0:  # Логируем каждые 10 кадров
+            logging.debug(f"Recorded {len(self.frames)} frames so far")
         return in_data, pyaudio.paContinue
 
     def find_stereo_mix(self):
