@@ -135,14 +135,14 @@ class PromptManager:
                                         selectbackground=self.colors['accent'],
                                         selectforeground=self.colors['text_primary'],
                                         relief=tk.FLAT)
-        self.description_text.pack(fill=tk.BOTH, expand=True, pady=5)
+        self.description_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=5)
 
-        # Убираем скроллбар - он не нужен для фиксированной высоты
-        # scrollbar = tk.Scrollbar(description_frame, orient=tk.VERTICAL,
-        #                          command=self.description_text.yview,
-        #                          bg=self.colors['bg_secondary'])
-        # scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        # self.description_text.config(yscrollcommand=scrollbar.set)
+        # Скроллбар для текста (возвращаем обратно)
+        scrollbar = tk.Scrollbar(description_frame, orient=tk.VERTICAL,
+                                 command=self.description_text.yview,
+                                 bg=self.colors['bg_secondary'])
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.description_text.config(yscrollcommand=scrollbar.set)
 
         # Кнопки (увеличиваем отступ сверху для лучшей видимости)
         button_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
