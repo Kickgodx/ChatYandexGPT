@@ -3,7 +3,7 @@
 """
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont, QAction
+from PyQt6.QtGui import QFont, QIcon, QPixmap, QAction, QPainter, QColor, QPen, QBrush
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTextEdit, QProgressBar, QMessageBox,
@@ -350,8 +350,8 @@ class ChatWidget(QWidget):
 
         # Форматируем ответ AI с выделением кода
         formatted_response = self._format_code_blocks(ai_response)
-        cursor.insertHtml(f'<p style="color: #E0E0E0; margin: 5px 0;"><b>🤖 AI:</b> {formatted_response}</p>')
-        cursor.insertHtml('<hr style="margin: 10px 0; border: 1px solid #6C6C6C;">')
+        # Ответ всегда с новой строки, без объединения с вопросом
+        cursor.insertHtml(f'<p style="color: #E0E0E0; margin: 0 0 15px 0;"><br><b>🤖 AI:</b>{formatted_response}</p>')
 
         # Прокручиваем вниз
         self.chat_text.setTextCursor(cursor)
@@ -475,6 +475,8 @@ class TextInputWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setup_ui()
+        # Устанавливаем фокус на поле ввода при создании
+        self.text_edit.setFocus()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -611,6 +613,7 @@ class ModernGUI(QMainWindow):
         self.setup_statusbar()
         self.setup_shortcuts()
         self.setup_signals()
+        self.setup_app_icon()
 
     def setup_ui(self):
         """Настройка основного интерфейса"""
@@ -663,6 +666,9 @@ class ModernGUI(QMainWindow):
 
         # Применяем темную тему
         self.apply_dark_theme()
+
+        # Устанавливаем фокус на поле ввода текста при запуске
+        self.text_input.text_edit.setFocus()
 
     def apply_dark_theme(self):
         """Применение темной темы"""
@@ -958,3 +964,49 @@ class ModernGUI(QMainWindow):
         """Обновить сообщение в диалоге прогресса"""
         if self.progress_dialog:
             self.progress_dialog.update_message(message)
+
+    def setup_app_icon(self):
+        """Установка иконки приложения"""
+        try:
+            # Создаем иконку программно
+            icon = self.create_app_icon()
+            if icon:
+                self.setWindowIcon(icon)
+        except Exception as e:
+            print(f"Ошибка установки иконки: {e}")
+
+    @staticmethod
+    def create_app_icon():
+        """Создание иконки приложения программно"""
+        try:
+            # Создаем простую иконку 32x32 пикселя
+            pixmap = QPixmap(32, 32)
+            pixmap.fill(Qt.GlobalColor.transparent)
+
+            # Рисуем простую иконку с символом микрофона и AI
+            # Это будет простая цветная иконка
+
+            painter = QPainter(pixmap)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+            # Фон - градиент от синего к фиолетовому
+            gradient = QBrush(QColor(70, 130, 180))  # Steel Blue
+            painter.fillRect(0, 0, 32, 32, gradient)
+
+            # Рисуем символ микрофона (белый круг с точкой)
+            painter.setPen(QPen(QColor(255, 255, 255), 2))
+            painter.setBrush(QBrush(QColor(255, 255, 255)))
+            painter.drawEllipse(8, 8, 16, 16)
+
+            # Рисуем символ AI (мозг/схема)
+            painter.setPen(QPen(QColor(100, 150, 200), 1))
+            painter.setBrush(QBrush(QColor(100, 150, 200)))
+            painter.drawEllipse(12, 12, 8, 8)
+
+            painter.end()
+
+            return QIcon(pixmap)
+
+        except Exception as e:
+            print(f"Ошибка создания иконки: {e}")
+            return None
