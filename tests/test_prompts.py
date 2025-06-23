@@ -2,16 +2,28 @@
 """
 Тестовый файл для демонстрации работы с промптами
 """
-
+import logging
 import os
 import sys
+
+from src.env_loader import load_env_variables, get_required_env_var, get_env_var
 
 # Добавляем корневую папку проекта в sys.path для корректного импорта
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from yandexchat_bot import ChatYandexGPTBot
 from src.prompt_collection import PromptCollection
-from yandex_creds import iam_token, folder_id, api_key
+
+load_env_variables()
+# Загрузка credentials из переменных окружения
+try:
+    folder_id = get_required_env_var("YANDEX_FOLDER_ID")
+    iam_token = get_env_var("YANDEX_IAM_TOKEN", None)
+    api_key = get_env_var("YANDEX_API_KEY", None)
+    vosk_model_path = get_env_var("VOSK_MODEL_PATH", "./vosk-model-ru-0.42")
+except ValueError as e:
+    logging.error(f"Ошибка загрузки credentials: {e}")
+    raise e
 
 
 def test_prompt_collection():

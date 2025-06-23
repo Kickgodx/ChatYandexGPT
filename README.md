@@ -364,6 +364,7 @@ ChatYandexGPT/
 ├── setup_project.py             # Скрипт автоматической инициализации
 ├── yandexGPT_console_test.py    # Консольная версия для тестирования
 ├── requirements.txt             # Зависимости Python
+├── tests/                       # Тесты для приложения
 ├── README.md                    # Документация
 ├── src/                         # Исходный код приложения
 │   ├── qt_gui/                  # 🆕 Исходный код для PyQt6 интерфейса
