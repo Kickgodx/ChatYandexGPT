@@ -38,7 +38,7 @@ class PromptManager:
 
         self.prompt_window = tk.Toplevel(self.app.gui.root)
         self.prompt_window.title("Выбор промпта")
-        self.prompt_window.geometry("700x600")  # Уменьшили высоту с 600 до 550
+        self.prompt_window.geometry("700x600")  # Начальный размер окна
         self.prompt_window.minsize(600, 500)  # Минимальный размер окна
         self.prompt_window.transient(self.app.gui.root)
         self.prompt_window.grab_set()
@@ -47,8 +47,8 @@ class PromptManager:
         # Центрирование окна
         self.prompt_window.update_idletasks()
         x = (self.prompt_window.winfo_screenwidth() // 2) - (700 // 2)
-        y = (self.prompt_window.winfo_screenheight() // 2) - (550 // 2)  # Обновили координату Y
-        self.prompt_window.geometry(f"700x550+{x}+{y}")  # Обновили размер
+        y = (self.prompt_window.winfo_screenheight() // 2) - (550 // 2)  # Центрирование по вертикали
+        self.prompt_window.geometry(f"700x550+{x}+{y}")  # Финальный размер окна
 
         self._create_prompt_selector_ui()
 
@@ -119,7 +119,7 @@ class PromptManager:
         # Привязка события изменения
         self.prompt_combobox.bind('<<ComboboxSelected>>', self._on_prompt_selected)
 
-        # Фрейм для описания (уменьшаем высоту)
+        # Фрейм для описания
         description_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
         description_frame.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
 
@@ -127,8 +127,8 @@ class PromptManager:
                  font=("Arial", 12, "bold"),
                  bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
 
-        # Текстовое поле для описания (уменьшаем высоту)
-        self.description_text = tk.Text(description_frame, wrap=tk.WORD, height=10,  # Уменьшили с 15 до 10
+        # Текстовое поле для описания
+        self.description_text = tk.Text(description_frame, wrap=tk.WORD, height=10,
                                         state=tk.DISABLED, font=("Consolas", 10),
                                         bg=self.colors['bg_secondary'], fg=self.colors['text_primary'],
                                         insertbackground=self.colors['text_primary'],
@@ -137,14 +137,14 @@ class PromptManager:
                                         relief=tk.FLAT)
         self.description_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=5)
 
-        # Скроллбар для текста (возвращаем обратно)
+        # Скроллбар для текста
         scrollbar = tk.Scrollbar(description_frame, orient=tk.VERTICAL,
                                  command=self.description_text.yview,
                                  bg=self.colors['bg_secondary'])
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.description_text.config(yscrollcommand=scrollbar.set)
 
-        # Кнопки (увеличиваем отступ сверху для лучшей видимости)
+        # Фрейм для кнопок
         button_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
         button_frame.pack(pady=15, padx=20, fill=tk.X)
 

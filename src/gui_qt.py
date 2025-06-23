@@ -22,8 +22,8 @@ class LiveTranscriptionWidget(QWidget):
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(2)  # Уменьшаем промежутки между элементами
-        layout.setContentsMargins(10, 5, 10, 5)  # Добавляем отступы
+        layout.setSpacing(2)  # Компактные промежутки между элементами
+        layout.setContentsMargins(10, 5, 10, 5)  # Внешние отступы виджета
 
         # Заголовок
         self.title_label = QLabel("🎯 Распознанный текст:")
@@ -69,7 +69,7 @@ class VoskStatusWidget(QWidget):
 
     def setup_ui(self):
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(10, 2, 10, 2)  # Уменьшаем вертикальные отступы с 5 до 2
+        layout.setContentsMargins(10, 2, 10, 2)  # Компактные вертикальные отступы
 
         # Иконка статуса
         self.status_icon = QLabel("🔄")
@@ -116,7 +116,7 @@ class PromptStatusWidget(QWidget):
 
     def setup_ui(self):
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(10, 2, 10, 2)  # Уменьшаем вертикальные отступы с 5 до 2
+        layout.setContentsMargins(10, 2, 10, 2)  # Компактные вертикальные отступы
 
         # Статус промпта
         self.prompt_label = QLabel("Помощник: Программист-помощник")
@@ -159,7 +159,7 @@ class RecordingButtonsWidget(QWidget):
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(3)  # Уменьшаем промежутки между элементами
+        layout.setSpacing(3)  # Компактные промежутки между элементами
 
         # Кнопки записи
         button_layout = QHBoxLayout()
@@ -227,7 +227,7 @@ class RecordingButtonsWidget(QWidget):
     def update_recording_status(self, is_recording: bool, device_type: str = None):
         """Обновление статуса записи извне"""
         if is_recording:
-            # Обновляем кнопки
+            # Изменяем состояние кнопок
             if device_type == 'mic':
                 self.mic_button.setText("⏹️ Остановить запись (микрофон)")
                 self.mic_button.setStyleSheet("""
@@ -345,7 +345,7 @@ class ChatWidget(QWidget):
         cursor = self.chat_text.textCursor()
         cursor.movePosition(cursor.MoveOperation.End)
 
-        # Добавляем сообщение пользователя
+        # Сообщение пользователя
         cursor.insertHtml(f'<p style="color: #E0E0E0; margin: 5px 0;"><b>👤 User:</b> {user_text}</p>')
 
         # Форматируем ответ AI с выделением кода
@@ -361,7 +361,7 @@ class ChatWidget(QWidget):
         """Форматирование блоков кода в тексте"""
         import re
 
-        # Заменяем переносы строк на HTML
+        # Конвертируем переносы строк в HTML
         text = text.replace('\n', '<br>')
 
         # Находим блоки кода (между тройными обратными кавычками)
@@ -659,7 +659,7 @@ class ModernGUI(QMainWindow):
         splitter.addWidget(self.text_input)
 
         # Устанавливаем пропорции: больше места для чата
-        splitter.setSizes([600, 120])  # Увеличиваем чат с 500 до 600
+        splitter.setSizes([600, 120])  # Пропорции разделителя: чат и ввод текста
 
         # Применяем темную тему
         self.apply_dark_theme()

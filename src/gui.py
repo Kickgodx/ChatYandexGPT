@@ -22,7 +22,7 @@ class GUI:
         self.progress_window = None
         self.progress_label = None
 
-        # Новые элементы для live-отображения
+        # Элементы для live-отображения распознанного текста
         self.live_transcription_label = None
         self.live_transcription_text = None
         self.is_transcribing = False
@@ -54,7 +54,7 @@ class GUI:
         """Создание графического интерфейса"""
         self.root = tk.Tk()
         self.root.title("AI Audio Recorder")
-        self.root.geometry("800x900")  # Уменьшаем высоту, убрав отдельное поле статуса
+        self.root.geometry("800x900")  # Размер основного окна приложения
         self.root.configure(bg=self.colors['bg_primary'])
 
         # Индикатор статуса модели Vosk

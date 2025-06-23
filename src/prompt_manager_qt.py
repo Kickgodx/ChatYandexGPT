@@ -265,7 +265,7 @@ class PromptSelectorDialog(QDialog):
             return
 
         content = prompt_info['content']
-        # Убираем лишние переносы строк для лучшего отображения
+        # Оптимизируем отображение текста
         content = content.replace('\n\n', '\n').replace('\n\n\n', '\n\n')
 
         self.description_text.setPlainText(content)
