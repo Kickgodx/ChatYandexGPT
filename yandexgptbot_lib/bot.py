@@ -38,7 +38,7 @@ class ChatYandexGPTBot:
                  model_name: str = "yandexgpt-lite"):
         """
         Инициализация бота
-        
+
         Args:
             folder_id: ID папки в Yandex Cloud
             iam_token: IAM токен для авторизации
@@ -48,7 +48,8 @@ class ChatYandexGPTBot:
         """
         # Проверка доступности модели
         if model_name not in self.AVAILABLE_MODELS:
-            raise ValueError(f"Модель '{model_name}' не поддерживается. Доступные модели: {list(self.AVAILABLE_MODELS.keys())}")
+            raise ValueError(
+                f"Модель '{model_name}' не поддерживается. Доступные модели: {list(self.AVAILABLE_MODELS.keys())}")
 
         self.model_name = model_name
         self.model_info = self.AVAILABLE_MODELS[model_name]
@@ -82,9 +83,11 @@ class ChatYandexGPTBot:
         if hasattr(self, 'chat'):
             # Сохраняем текущие credentials
             if hasattr(self.chat, 'api_key'):
-                self.chat = ChatYandexGPT(api_key=self.chat.api_key, folder_id=self.chat.folder_id, model_name=model_name)
+                self.chat = ChatYandexGPT(api_key=self.chat.api_key, folder_id=self.chat.folder_id,
+                                          model_name=model_name)
             elif hasattr(self.chat, 'iam_token'):
-                self.chat = ChatYandexGPT(iam_token=self.chat.iam_token, folder_id=self.chat.folder_id, model_name=model_name)
+                self.chat = ChatYandexGPT(iam_token=self.chat.iam_token, folder_id=self.chat.folder_id,
+                                          model_name=model_name)
 
         logging.info(f"Model changed to: {model_name}")
 
@@ -127,10 +130,10 @@ class ChatYandexGPTBot:
     def get_response(self, user_input: str) -> str:
         """
         Получить ответ от AI
-        
+
         Args:
             user_input: Ввод пользователя
-            
+
         Returns:
             Ответ от AI
         """
@@ -167,7 +170,7 @@ class ChatYandexGPTBot:
     def add_context(self, context: str) -> None:
         """
         Добавить контекстную информацию в диалог
-        
+
         Args:
             context: Контекстная информация
         """
@@ -182,7 +185,8 @@ class ChatYandexGPTBot:
 
         user_messages = [msg.content for msg in self.messages if isinstance(msg, HumanMessage)]
         ai_messages = [msg.content for msg in self.messages if
-                       hasattr(msg, 'content') and not isinstance(msg, HumanMessage) and not isinstance(msg, SystemMessage)]
+                       hasattr(msg, 'content') and not isinstance(msg, HumanMessage) and not isinstance(msg,
+                                                                                                        SystemMessage)]
 
         summary = f"Диалог содержит {len(user_messages)} сообщений пользователя и {len(ai_messages)} ответов AI (модель: {self.model_info['name']})"
         return summary

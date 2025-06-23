@@ -38,7 +38,8 @@ class PromptManager:
 
         self.prompt_window = tk.Toplevel(self.app.gui.root)
         self.prompt_window.title("Выбор промпта")
-        self.prompt_window.geometry("700x600")
+        self.prompt_window.geometry("700x600")  # Уменьшили высоту с 600 до 550
+        self.prompt_window.minsize(600, 500)  # Минимальный размер окна
         self.prompt_window.transient(self.app.gui.root)
         self.prompt_window.grab_set()
         self.prompt_window.configure(bg=self.colors['bg_primary'])
@@ -46,8 +47,8 @@ class PromptManager:
         # Центрирование окна
         self.prompt_window.update_idletasks()
         x = (self.prompt_window.winfo_screenwidth() // 2) - (700 // 2)
-        y = (self.prompt_window.winfo_screenheight() // 2) - (600 // 2)
-        self.prompt_window.geometry(f"700x600+{x}+{y}")
+        y = (self.prompt_window.winfo_screenheight() // 2) - (550 // 2)  # Обновили координату Y
+        self.prompt_window.geometry(f"700x550+{x}+{y}")  # Обновили размер
 
         self._create_prompt_selector_ui()
 
@@ -57,11 +58,11 @@ class PromptManager:
         title_label = tk.Label(self.prompt_window, text="Выберите тип помощника",
                                font=("Arial", 16, "bold"),
                                bg=self.colors['bg_primary'], fg=self.colors['text_primary'])
-        title_label.pack(pady=20)
+        title_label.pack(pady=15)
 
         # Фрейм для выбора модели
         model_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
-        model_frame.pack(pady=10, padx=20, fill=tk.X)
+        model_frame.pack(pady=5, padx=20, fill=tk.X)
 
         # Комбобокс для выбора модели
         tk.Label(model_frame, text="Модель YandexGPT:",
@@ -89,7 +90,7 @@ class PromptManager:
 
         # Фрейм для выбора промпта
         selection_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
-        selection_frame.pack(pady=20, padx=20, fill=tk.X)
+        selection_frame.pack(pady=10, padx=20, fill=tk.X)
 
         # Комбобокс для выбора промпта
         tk.Label(selection_frame, text="Тип помощника:",
@@ -118,16 +119,16 @@ class PromptManager:
         # Привязка события изменения
         self.prompt_combobox.bind('<<ComboboxSelected>>', self._on_prompt_selected)
 
-        # Фрейм для описания
+        # Фрейм для описания (уменьшаем высоту)
         description_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
-        description_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+        description_frame.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
 
         tk.Label(description_frame, text="Описание выбранного помощника:",
                  font=("Arial", 12, "bold"),
                  bg=self.colors['bg_primary'], fg=self.colors['text_primary']).pack(anchor=tk.W)
 
-        # Текстовое поле для описания
-        self.description_text = tk.Text(description_frame, wrap=tk.WORD, height=15,
+        # Текстовое поле для описания (уменьшаем высоту)
+        self.description_text = tk.Text(description_frame, wrap=tk.WORD, height=10,  # Уменьшили с 15 до 10
                                         state=tk.DISABLED, font=("Consolas", 10),
                                         bg=self.colors['bg_secondary'], fg=self.colors['text_primary'],
                                         insertbackground=self.colors['text_primary'],
@@ -136,22 +137,22 @@ class PromptManager:
                                         relief=tk.FLAT)
         self.description_text.pack(fill=tk.BOTH, expand=True, pady=5)
 
-        # Скроллбар для текста
-        scrollbar = tk.Scrollbar(description_frame, orient=tk.VERTICAL,
-                                 command=self.description_text.yview,
-                                 bg=self.colors['bg_secondary'])
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.description_text.config(yscrollcommand=scrollbar.set)
+        # Убираем скроллбар - он не нужен для фиксированной высоты
+        # scrollbar = tk.Scrollbar(description_frame, orient=tk.VERTICAL,
+        #                          command=self.description_text.yview,
+        #                          bg=self.colors['bg_secondary'])
+        # scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # self.description_text.config(yscrollcommand=scrollbar.set)
 
-        # Кнопки
+        # Кнопки (увеличиваем отступ сверху для лучшей видимости)
         button_frame = tk.Frame(self.prompt_window, bg=self.colors['bg_primary'])
-        button_frame.pack(pady=20, padx=20, fill=tk.X)
+        button_frame.pack(pady=15, padx=20, fill=tk.X)
 
         # Кнопка применения (зеленая, самая заметная)
         apply_button = tk.Button(button_frame, text="✅ Применить",
                                  command=self._apply_prompt,
                                  bg=self.colors['success'], fg=self.colors['text_primary'],
-                                 font=("Arial", 12, "bold"), height=2, width=15,
+                                 font=("Arial", 12, "bold"), width=15,
                                  relief=tk.FLAT, activebackground=self.colors['accent'],
                                  activeforeground=self.colors['text_primary'])
         apply_button.pack(side=tk.LEFT, padx=10)
@@ -160,7 +161,7 @@ class PromptManager:
         reset_button = tk.Button(button_frame, text="🔄 Сбросить диалог",
                                  command=self._reset_conversation,
                                  bg=self.colors['warning'], fg=self.colors['text_primary'],
-                                 font=("Arial", 11), height=2, width=15,
+                                 font=("Arial", 11), width=15,
                                  relief=tk.FLAT, activebackground=self.colors['accent'],
                                  activeforeground=self.colors['text_primary'])
         reset_button.pack(side=tk.LEFT, padx=10)
@@ -169,7 +170,7 @@ class PromptManager:
         cancel_button = tk.Button(button_frame, text="❌ Отмена",
                                   command=self._cancel,
                                   bg=self.colors['error'], fg=self.colors['text_primary'],
-                                  font=("Arial", 11), height=2, width=15,
+                                  font=("Arial", 11), width=15,
                                   relief=tk.FLAT, activebackground=self.colors['accent'],
                                   activeforeground=self.colors['text_primary'])
         cancel_button.pack(side=tk.RIGHT, padx=10)

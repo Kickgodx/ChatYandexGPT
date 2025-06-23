@@ -55,4 +55,6 @@ urllib3==2.2.3
 vosk==0.3.45
 websockets==13.1
 yandexcloud==0.319.0
-yarl==1.11.1 
+yarl==1.11.1
+psutil~=7.0.0
+setuptools~=80.9.0

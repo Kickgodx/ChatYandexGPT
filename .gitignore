@@ -120,7 +120,6 @@ vosk-model*/
 outputs/
 
 # Credentials and sensitive data
-.env
 .env.local
 .env.production
 .env.development
