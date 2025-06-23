@@ -19,8 +19,8 @@ from src.audio_recorder import AudioRecorder
 from src.config import Config
 from src.conversation_manager import ConversationManager
 from src.env_loader import get_env_var, get_required_env_var
-from src.gui_qt import ModernGUI
-from src.prompt_manager_qt import PromptManagerQt
+from src.qt_gui.modern_gui import ModernGUI
+from src.qt_gui.prompt_manager_qt import PromptManagerQt
 from src.settings import Settings
 from src.speech_recognizer import get_global_recognizer, preload_vosk_model
 from src.utils import setup_logging, ensure_output_directory
@@ -95,7 +95,7 @@ class AIAudioRecorderApp:
         # Инициализация менеджера промптов
         self.prompt_manager = PromptManagerQt(self)
         # Статус промпта уже отображается в PromptStatusWidget в PyQt6 версии
-        
+
         # Обновляем статус промпта в GUI
         current_prompt = self.bot.get_current_prompt_info()
         current_model = self.bot.get_current_model_info()
@@ -168,9 +168,10 @@ class AIAudioRecorderApp:
             frames = self.audio_recorder.stop_recording()
             # Обновляем GUI через виджет
             self.gui.recording_widget.update_recording_status(False)
-            
-            logging.info(f"Stop recording called, frames received: {frames is not None}, frames count: {len(frames) if frames else 0}")
-            
+
+            logging.info(
+                f"Stop recording called, frames received: {frames is not None}, frames count: {len(frames) if frames else 0}")
+
             if frames:
                 logging.info(f"Starting audio processing with {len(frames)} frames")
                 self.process_audio(frames)
@@ -194,7 +195,7 @@ class AIAudioRecorderApp:
         def process():
             try:
                 logging.info("Audio processing thread started")
-                
+
                 # Получаем актуальный экземпляр распознавателя
                 current_recognizer = get_global_recognizer(self.speech_recognizer.model_path, preload=False)
                 logging.info(f"Got recognizer, model loaded: {current_recognizer.is_model_loaded()}")
@@ -202,7 +203,8 @@ class AIAudioRecorderApp:
                 # Проверяем, загружена ли модель перед обработкой
                 if not current_recognizer.is_model_loaded():
                     logging.error("Model not loaded, cannot process audio")
-                    self.gui.show_error_signal.emit("Ошибка", "Модель распознавания речи еще не загружена. Подождите немного.")
+                    self.gui.show_error_signal.emit("Ошибка",
+                                                    "Модель распознавания речи еще не загружена. Подождите немного.")
                     return
 
                 logging.info("Saving audio...")
@@ -237,7 +239,8 @@ class AIAudioRecorderApp:
 
                 if not transcribed_text.strip():
                     logging.warning("No text transcribed from audio")
-                    self.gui.show_warning_signal.emit("Предупреждение", "Речь не распознана. Попробуйте говорить четче.")
+                    self.gui.show_warning_signal.emit("Предупреждение",
+                                                      "Речь не распознана. Попробуйте говорить четче.")
                     self.gui.hide_progress_signal.emit()
                     return
 

@@ -366,6 +366,7 @@ ChatYandexGPT/
 ├── requirements.txt             # Зависимости Python
 ├── README.md                    # Документация
 ├── src/                         # Исходный код приложения
+│   ├── qt_gui/                  # 🆕 Исходный код для PyQt6 интерфейса
 │   ├── __init__.py              # Инициализация пакета
 │   ├── env_loader.py            # Загрузка переменных окружения
 │   ├── config.py                # Конфигурация приложения
@@ -375,9 +376,7 @@ ChatYandexGPT/
 │   ├── speech_recognizer.py     # Распознавание речи (с оптимизацией)
 │   ├── conversation_manager.py  # Управление диалогами
 │   ├── gui.py                   # Графический интерфейс Tkinter
-│   ├── gui_qt.py                # 🆕 Графический интерфейс PyQt6
 │   ├── prompt_manager.py        # Управление выбором промптов (Tkinter)
-│   ├── prompt_manager_qt.py     # 🆕 Управление выбором промптов (PyQt6)
 │   └── utils.py                 # Утилиты
 ├── yandexgptbot_lib/            # Библиотека и файлы сборки
 │   ├── __init__.py              # Инициализация библиотеки
